@@ -1,0 +1,104 @@
+<style>
+	#form, #time {
+		display: flex;
+		flex-direction: column;
+		width: 400px;
+		border: 1px #000 solid;
+		margin: 10px;
+		padding: 15px;
+	}
+
+	#date, #time-left {
+		border: 1px #000 solid;
+		font-size: 2em;
+		text-align: center;
+	}
+	#time-left {
+		margin-top: 20px;
+	}
+
+	.form-group {
+		display: flex;
+	}
+</style>
+
+
+
+<div id="form">
+	<div class="form-group">
+		<label>Min:</label>
+		<input id="minutes" type="number">
+
+		<label>Sec:</label>
+		<input id="seconds" type="number">
+	</div>
+
+	<button onclick="subscribe()">Subscribe</button>
+</div>
+
+<div id="time">
+	<div id="date"></div>
+	<div id="time-left"></div>
+</div>
+
+
+
+<script>
+var minutesLeft = localStorage.minutesLeft
+    secondsLeft = localStorage.secondsLeft;
+
+var minutesNode = document.getElementById("minutes")
+    secondsNode = document.getElementById("seconds");
+
+var isRinging = false;
+
+minutesNode.value = minutesLeft;
+secondsNode.value = secondsLeft;
+
+function subscribe() {
+	minutesLeft = minutesNode.value;
+	secondsLeft = secondsNode.value;
+	localStorage.minutesLeft = minutesLeft;
+	localStorage.secondsLeft = secondsLeft;
+}
+
+function everySecond() {
+	const dateNode = document.getElementById("date");
+	const timeLeftNode = document.getElementById("time-left");
+	const date = new Date();
+	dateNode.innerHTML = [date.getHours(), date.getMinutes(), date.getSeconds()]
+		.map(x => x.toString().padStart(2, '0'))
+		.join(':');
+
+	document.getElementById('time-left').style.display = 
+		minutesLeft >= 0 && secondsLeft >= 0
+		? 'block'
+		: 'none';
+
+	intervalStartDate = new Date(
+		[
+			'2020-09-14T00',
+			minutesLeft.padStart(2, '0'),
+			secondsLeft.padStart(2, '0')
+		].join(':')
+	).getTime();
+
+	leftTime = 600 - Math.floor((date.getTime() - intervalStartDate) / 1000) % 600;
+	leftMins = Math.floor(leftTime / 60);
+	leftSecs = leftTime % 60;
+
+	timeLeftNode.innerHTML = [leftMins, leftSecs]
+		.map(x => x.toString().padStart(2, '0'))
+		.join(':');
+
+	if (leftTime < 5 && !isRinging) {
+		const snd = new Audio('./alarm.mp3');
+		snd.play();
+		isRinging = true;
+	}
+	else if (leftTime > 590) {
+		isRinging = false;
+	}
+}
+setInterval(everySecond, 1000);
+</script>
