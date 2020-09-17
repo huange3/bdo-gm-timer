@@ -99,12 +99,12 @@ function everySecond() {
 		.map(x => x.toString().padStart(2, '0'))
 		.join(':');
 
-	if (leftTime < 8 && !isRinging) {
+	if (leftTime <= 8 && !isRinging) {
 		const snd = new Audio('./alarm.mp3');
 		snd.play();
 		isRinging = true;
 	}
-	else if (leftTime > 590) {
+	else if (leftTime > 8) {
 		isRinging = false;
 	}
 }
